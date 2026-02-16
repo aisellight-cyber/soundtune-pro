@@ -1,0 +1,119 @@
+.story-container {
+  width: 100%;
+  height: 100vh;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  background: linear-gradient(180deg, #ffffff 0%, #f9f9f9 100%);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+}
+
+/* Hide scrollbar but keep functionality */
+.story-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.story-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.story-container::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+}
+
+.story-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.story-header {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  text-align: center;
+}
+
+.story-title {
+  font-size: 4rem;
+  font-weight: 800;
+  margin: 0 0 1rem 0;
+  line-height: 1.1;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.story-description {
+  font-size: 1.3rem;
+  max-width: 600px;
+  margin: 0;
+  line-height: 1.6;
+  opacity: 0.95;
+}
+
+.story-panels {
+  position: relative;
+}
+
+.panel-wrapper {
+  width: 100%;
+}
+
+.story-footer {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  color: white;
+  font-size: 2rem;
+  text-align: center;
+}
+
+/* Smooth transitions */
+@media (prefers-reduced-motion: no-preference) {
+  .story-container {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .story-header {
+    min-height: 60vh;
+    padding: 3rem 2rem;
+  }
+
+  .story-title {
+    font-size: 2.5rem;
+  }
+
+  .story-description {
+    font-size: 1.1rem;
+  }
+
+  .story-footer {
+    min-height: 60vh;
+  }
+}
+
+@media (max-width: 480px) {
+  .story-header {
+    min-height: 50vh;
+    padding: 2rem 1rem;
+  }
+
+  .story-title {
+    font-size: 1.8rem;
+  }
+
+  .story-description {
+    font-size: 1rem;
+  }
+}
