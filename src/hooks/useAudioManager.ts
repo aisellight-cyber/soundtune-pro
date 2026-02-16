@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import React, { useCallback, useRef, useState, useEffect } from 'react';
 
 interface AudioState {
   currentlyPlaying: string | null;
@@ -70,33 +70,32 @@ export const useAudioManager = () => {
   };
 };
 
-export const useIntersectionObserver = () => {
+export const useIntersectionObserverContainer = () => {
   const ref = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useIntersectionObserver(ref);
+  const [isVisible] = useIntersectionObserver(ref);
 
   return { ref, isVisible };
 };
 
-function useIntersectionObserver(ref: React.RefObject<HTMLElement>) {
-  const [isVisible, setIsVisible] = React.useState(false);
+function useIntersectionObserver(ref: React.RefObject<HTMLElement | null>) {
+  const [isVisible, setIsVisible] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-        }
+        setIsVisible(entry.isIntersecting);
       },
       { threshold: 0.3 }
     );
 
-    if (ref.current) {
-      observer.observe(ref.current);
+    const currentRef = ref.current;
+    if (currentRef) {
+      observer.observe(currentRef);
     }
 
     return () => {
-      if (ref.current) {
-        observer.unobserve(ref.current);
+      if (currentRef) {
+        observer.unobserve(currentRef);
       }
     };
   }, [ref]);
