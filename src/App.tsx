@@ -7,7 +7,7 @@ export default function App() {
   const [chapterImage, setChapterImage] = useState<any>(null);
   const [panels, setPanels] = useState<any[]>([]);
   const [editingTrigger, setEditingTrigger] = useState<any>(null);
-  const [viewMode, setViewMode] = useState<'studio' | 'reader'>('reader');
+  const [viewMode, setViewMode] = useState<'studio' | 'reader'>('studio');
   const [loading, setLoading] = useState(false);
   
   const audioManager = useRef<Map<string, HTMLAudioElement>>(new Map());
@@ -53,7 +53,7 @@ export default function App() {
       alert("Published!");
     } catch (err) {
       console.error(err);
-      alert("Error");
+      alert("Error publishing");
     } finally {
       setLoading(false);
     }
@@ -222,7 +222,7 @@ export default function App() {
       
       {viewMode === 'reader' && panels.length === 0 && (
         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
-          <p style={{ color: '#555', marginBottom: '20px' }}>No chapters yet.</p>
+          <p style={{ color: '#555', marginBottom: '20px' }}>No chapters published yet.</p>
           <button onClick={() => setViewMode('studio')} style={{ padding: '15px 30px', background: '#3b82f6', border: 'none', color: '#fff', borderRadius: '50px', fontWeight: 'bold', cursor: 'pointer' }}>
             START CREATING
           </button>
