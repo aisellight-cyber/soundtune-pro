@@ -36,24 +36,24 @@ export default function App() {
   };
 
   const handlePublish = async () => {
-    if (!chapterTitle || panels.length === 0) return;
+    if (!chapterTitle || panels.length === 0) {
+      alert("Please add a title and panels");
+      return;
+    }
     setLoading(true);
     try {
       const { error } = await supabase
         .from('episodes')
-        .insert([{ 
-          title: chapterTitle, 
-          content: panels,
-          thumbnail: chapterImage 
-        }]);
-
+        .insert([{ title: chapterTitle, content: panels, thumbnail: chapterImage }]);
       if (error) throw error;
       setChapterTitle("");
       setChapterImage(null);
       fetchContent();
       setViewMode('reader');
+      alert("Published!");
     } catch (err) {
       console.error(err);
+      alert("Error");
     } finally {
       setLoading(false);
     }
@@ -148,7 +148,6 @@ export default function App() {
     const rect = e.target.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
-
     const newTrigger = {
       id: `trig-${Date.now()}`,
       xPos: x, yPos: y,
@@ -159,7 +158,6 @@ export default function App() {
       startPanelId: panelId,
       endPanelId: panelId
     };
-
     setPanels(prev => prev.map(p => p.id === panelId ? { ...p, triggers: [...p.triggers, newTrigger] } : p));
     setEditingTrigger({ panelId, trigger: { ...newTrigger } });
   };
@@ -177,7 +175,6 @@ export default function App() {
 
   const PanelWithAudio = ({ panel, allPanels }: { panel: any; allPanels: any[] }) => {
     const panelRef = useRef<HTMLDivElement>(null);
-
     useEffect(() => {
       const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
@@ -221,51 +218,45 @@ export default function App() {
   };
 
   return (
-    <div style={{ backgroundColor: '#000', color: '#fff', height: '100vh', display: 'flex', overflow: 'hidden' }}>
+    <div style={{ backgroundColor: '#000', color: '#fff', height: '100vh', display: 'flex', overflow: 'hidden', position: 'relative' }}>
+      
+      {viewMode === 'reader' && panels.length === 0 && (
+        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
+          <p style={{ color: '#555', marginBottom: '20px' }}>No chapters yet.</p>
+          <button onClick={() => setViewMode('studio')} style={{ padding: '15px 30px', background: '#3b82f6', border: 'none', color: '#fff', borderRadius: '50px', fontWeight: 'bold', cursor: 'pointer' }}>
+            START CREATING
+          </button>
+        </div>
+      )}
+
       {viewMode === 'studio' && (
-        <aside style={{ width: '380px', background: '#0a0a0a', borderRight: '1px solid #1a1a1a', display: 'flex', flexDirection: 'column', height: '100vh' }}>
+        <aside style={{ width: '380px', background: '#0a0a0a', borderRight: '1px solid #1a1a1a', display: 'flex', flexDirection: 'column', height: '100vh', zIndex: 1000 }}>
           <div style={{ padding: '20px', borderBottom: '1px solid #1a1a1a' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#3b82f6', marginBottom: '15px' }}>
-              <Icons.Zap size={20} fill="#3b82f6" /> 
-              <span style={{ fontWeight: 900 }}>STUDIO MODE</span>
-            </div>
-            
             <div style={{ marginBottom: '15px' }}>
               {chapterImage ? (
-                <div style={{ position: 'relative', width: '100%', height: '100px', borderRadius: '8px', overflow: 'hidden', border: '1px solid #333' }}>
+                <div style={{ position: 'relative', width: '100%', height: '100px', borderRadius: '8px', overflow: 'hidden' }}>
                   <img src={chapterImage} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="thumb" />
-                  <button onClick={() => setChapterImage(null)} style={{ position: 'absolute', top: '5px', right: '5px', background: 'rgba(0,0,0,0.7)', border: 'none', borderRadius: '50%', padding: '5px', cursor: 'pointer' }}>
-                    <Icons.X size={14} color="white" />
-                  </button>
+                  <button onClick={() => setChapterImage(null)} style={{ position: 'absolute', top: '5px', right: '5px', background: 'black', border: 'none', borderRadius: '50%', cursor: 'pointer' }}><Icons.X size={14} color="white" /></button>
                 </div>
               ) : (
                 <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '60px', background: '#111', border: '1px dashed #333', borderRadius: '8px', cursor: 'pointer' }}>
                   <Icons.Image size={20} color="#333" />
-                  <span style={{ fontSize: '10px', color: '#555' }}>Thumbnail</span>
                   <input type="file" accept="image/*" hidden onChange={handleChapterImageUpload} />
                 </label>
               )}
             </div>
-
-            <button onClick={() => setViewMode('reader')} style={{ width: '100%', padding: '10px', background: '#111', border: '1px solid #333', color: '#fff', borderRadius: '8px', cursor: 'pointer', marginBottom: '10px' }}>EXIT STUDIO</button>
-            <button onClick={handlePublish} disabled={loading} style={{ width: '100%', padding: '10px', background: '#3b82f6', border: 'none', color: '#fff', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
-              {loading ? 'PUBLISHING...' : 'PUBLISH CHAPTER'}
-            </button>
-            <input type="text" placeholder="Chapter Title" value={chapterTitle} onChange={(e:any) => setChapterTitle(e.target.value)} style={{ width: '100%', background: '#111', border: '1px solid #222', padding: '8px', borderRadius: '6px', color: '#fff', marginTop: '10px' }} />
+            <button onClick={() => setViewMode('reader')} style={{ width: '100%', padding: '10px', background: '#111', color: '#fff', borderRadius: '8px', cursor: 'pointer', marginBottom: '10px' }}>CLOSE</button>
+            <button onClick={handlePublish} disabled={loading} style={{ width: '100%', padding: '10px', background: '#3b82f6', color: '#fff', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>PUBLISH</button>
+            <input type="text" placeholder="Title" value={chapterTitle} onChange={(e:any) => setChapterTitle(e.target.value)} style={{ width: '100%', background: '#111', border: '1px solid #222', padding: '8px', borderRadius: '6px', color: '#fff', marginTop: '10px' }} />
           </div>
 
           {editingTrigger && (
-            <div style={{ background: '#111', borderBottom: '1px solid #333', padding: '15px', overflowY: 'auto' }}>
-               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                  <span style={{ fontSize: '12px', color: '#3b82f6', fontWeight: 'bold' }}>AUDIO SETTINGS</span>
-                  <div style={{ display: 'flex', gap: '10px' }}>
-                    <Icons.Play size={16} color="#4ade80" style={{ cursor: 'pointer' }} onClick={() => playAudio(editingTrigger.trigger)} />
-                    <Icons.Square size={16} color="#f44" style={{ cursor: 'pointer' }} onClick={() => immediateStop(editingTrigger.trigger.id)} />
-                  </div>
-               </div>
-               <input type="file" accept="audio/*" onChange={(e: any) => { if(e.target.files[0]) setEditingTrigger({...editingTrigger, trigger: {...editingTrigger.trigger, audioUrl: URL.createObjectURL(e.target.files[0])}}); }} style={{ width: '100%', marginBottom: '10px', fontSize: '10px' }} />
-               <button onClick={saveTriggerSettings} style={{ width: '100%', background: '#3b82f6', padding: '8px', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold', marginBottom: '5px' }}>SAVE</button>
-               <button onClick={() => deleteTrigger(editingTrigger.panelId, editingTrigger.trigger.id)} style={{ width: '100%', background: '#300', padding: '8px', borderRadius: '4px' }}><Icons.Trash2 size={14} color="#f44" /></button>
+            <div style={{ background: '#111', padding: '15px', borderBottom: '1px solid #333' }}>
+              <input type="file" accept="audio/*" onChange={(e: any) => { if(e.target.files[0]) setEditingTrigger({...editingTrigger, trigger: {...editingTrigger.trigger, audioUrl: URL.createObjectURL(e.target.files[0])}}); }} style={{ fontSize: '10px', marginBottom: '10px' }} />
+              <div style={{ display: 'flex', gap: '5px' }}>
+                <button onClick={saveTriggerSettings} style={{ flex: 1, background: '#3b82f6', color: 'white', border: 'none', padding: '5px', borderRadius: '4px' }}>SAVE</button>
+                <button onClick={() => deleteTrigger(editingTrigger.panelId, editingTrigger.trigger.id)} style={{ flex: 1, background: '#f44', color: 'white', border: 'none', padding: '5px', borderRadius: '4px' }}>DELETE</button>
+              </div>
             </div>
           )}
 
@@ -277,11 +268,9 @@ export default function App() {
         </aside>
       )}
 
-      <main style={{ flex: 1, overflowY: 'auto', position: 'relative' }}>
+      <main style={{ flex: 1, overflowY: 'auto' }}>
         {viewMode === 'reader' && (
-          <button 
-            onClick={() => setViewMode('studio')} 
-            style={{ position: 'fixed', top: '20px', left: '20px', zIndex: 100, background: 'rgba(59, 130, 246, 0.5)', border: 'none', color: '#fff', padding: '10px', borderRadius: '50%', cursor: 'pointer' }}>
+          <button onClick={() => setViewMode('studio')} style={{ position: 'fixed', top: '20px', left: '20px', zIndex: 100, background: '#3b82f6', border: 'none', color: '#fff', padding: '10px', borderRadius: '50%', cursor: 'pointer' }}>
             <Icons.Settings size={20} />
           </button>
         )}
