@@ -156,8 +156,8 @@ export default function App() {
     }, [allPanels, panel.id, playAudio, stopAudioWithFade]);
 
     return (
-      <div ref={panelRef} style={{ width: '100%', position: 'relative', lineHeight: 0, marginBottom: '2px' }}>
-        <img src={panel.imageUrl} onClick={(e) => addSoundTrigger(panel.id, e)} style={{ width: '100%', cursor: viewMode === 'studio' ? 'crosshair' : 'default', display: 'block' }} alt="manhwa-panel" />
+      <div ref={panelRef} style={{ width: '100%', position: 'relative', lineHeight: 0, marginBottom: '0px', display: 'block' }}>
+        <img src={panel.imageUrl} onClick={(e) => addSoundTrigger(panel.id, e)} style={{ width: '100%', cursor: viewMode === 'studio' ? 'crosshair' : 'default', display: 'block' }} />
         {viewMode === 'studio' && panel.triggers.map((t: any) => (
           <div key={t.id} onClick={() => setEditingTrigger({ panelId: panel.id, trigger: { ...t } })}
             style={{ position: 'absolute', top: `${t.yPos}%`, left: `${t.xPos}%`, transform: 'translate(-50%, -50%)', background: editingTrigger?.trigger.id === t.id ? '#fff' : '#3b82f6', borderRadius: '50%', padding: '10px', zIndex: 10, border: '2px solid white', cursor: 'pointer' }}>
@@ -190,15 +190,12 @@ export default function App() {
                 <span style={{ color: '#3b82f6', fontSize: '12px', fontWeight: 'bold' }}>SOUND SETTINGS</span>
                 <Icons.Trash2 size={16} color="#ef4444" style={{ cursor: 'pointer' }} onClick={() => deleteTrigger(editingTrigger.panelId, editingTrigger.trigger.id)} />
               </div>
-              
               <input type="file" accept="audio/*" onChange={(e: any) => e.target.files[0] && setEditingTrigger({...editingTrigger, trigger: {...editingTrigger.trigger, audioUrl: URL.createObjectURL(e.target.files[0])}})} style={{ fontSize: '11px', marginBottom: '15px', width: '100%' }} />
-              
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <div>
                   <label style={{ fontSize: '11px', color: '#888', display: 'block', marginBottom: '5px' }}>Volume ({(editingTrigger.trigger.volume * 100).toFixed(0)}%)</label>
                   <input type="range" min="0" max="1" step="0.01" value={editingTrigger.trigger.volume} onChange={(e) => setEditingTrigger({...editingTrigger, trigger: {...editingTrigger.trigger, volume: parseFloat(e.target.value)}})} style={{ width: '100%', cursor: 'pointer' }} />
                 </div>
-
                 <div style={{ display: 'flex', gap: '10px' }}>
                   <div style={{ flex: 1 }}>
                     <label style={{ fontSize: '11px', color: '#888' }}>Fade In (s)</label>
@@ -209,7 +206,6 @@ export default function App() {
                     <input type="number" step="0.1" value={editingTrigger.trigger.fadeOut} onChange={(e) => setEditingTrigger({...editingTrigger, trigger: {...editingTrigger.trigger, fadeOut: parseFloat(e.target.value)}})} style={{ width: '100%', background: '#000', border: '1px solid #333', color: '#fff', padding: '6px', marginTop: '4px' }} />
                   </div>
                 </div>
-
                 <div>
                   <label style={{ fontSize: '11px', color: '#888' }}>Stop at Panel (End)</label>
                   <select value={editingTrigger.trigger.endPanelId} onChange={(e) => setEditingTrigger({...editingTrigger, trigger: {...editingTrigger.trigger, endPanelId: e.target.value}})} style={{ width: '100%', background: '#000', border: '1px solid #333', color: '#fff', padding: '8px', marginTop: '4px', cursor: 'pointer' }}>
@@ -217,7 +213,6 @@ export default function App() {
                   </select>
                 </div>
               </div>
-
               <button onClick={saveTriggerSettings} style={{ width: '100%', marginTop: '20px', background: '#3b82f6', color: 'white', padding: '10px', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>SAVE SETTINGS</button>
             </div>
           )}
@@ -228,7 +223,7 @@ export default function App() {
             </label>
             {panels.map((p, i) => (
               <div key={p.id} style={{ display: 'flex', gap: '10px', padding: '10px', background: '#111', marginTop: '8px', borderRadius: '4px', alignItems: 'center' }}>
-                <img src={p.imageUrl} style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '2px' }} alt="panel-thumb" />
+                <img src={p.imageUrl} style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '2px' }} />
                 <span style={{ fontSize: '12px', color: '#eee' }}>Panel {i + 1}</span>
               </div>
             ))}
@@ -236,14 +231,13 @@ export default function App() {
         </aside>
       )}
 
-      <main style={{ flex: 1, height: '100vh', overflowY: 'auto', background: '#000', position: 'relative' }}>
+      <main style={{ flex: 1, height: '100vh', overflowY: 'auto', background: '#000', position: 'relative', fontSize: 0 }}>
         {viewMode === 'reader' && (
-          <button onClick={() => setViewMode('studio')} style={{ position: 'fixed', top: '20px', left: '20px', zIndex: 1000, background: '#3b82f6', border: 'none', padding: '12px', borderRadius: '50%', cursor: 'pointer', color: 'white', boxShadow: '0 4px 15px rgba(0,0,0,0.5)' }}>
+          <button onClick={() => setViewMode('studio')} style={{ position: 'fixed', top: '20px', left: '20px', zIndex: 1000, background: '#3b82f6', border: 'none', padding: '12px', borderRadius: '50%', cursor: 'pointer', color: 'white' }}>
             <Icons.Settings size={22} />
           </button>
         )}
-        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-          {panels.length === 0 && <div style={{ textAlign: 'center', padding: '100px', color: '#444' }}>No content. Use Studio to upload panels.</div>}
+        <div style={{ maxWidth: '800px', margin: '0 auto', fontSize: 0, lineHeight: 0 }}>
           {panels.map((panel: any) => <PanelWithAudio key={panel.id} panel={panel} allPanels={panels} />)}
         </div>
       </main>
