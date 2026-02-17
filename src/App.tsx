@@ -29,16 +29,27 @@ export default function App() {
     fetchContent();
   }, [fetchContent]);
 
+  const handleChapterImageUpload = (e: any) => {
+    if (e.target.files && e.target.files[0]) {
+      setChapterImage(URL.createObjectURL(e.target.files[0]));
+    }
+  };
+
   const handlePublish = async () => {
     if (!chapterTitle || panels.length === 0) return;
     setLoading(true);
     try {
       const { error } = await supabase
         .from('episodes')
-        .insert([{ title: chapterTitle, content: panels }]);
+        .insert([{ 
+          title: chapterTitle, 
+          content: panels,
+          thumbnail: chapterImage 
+        }]);
 
       if (error) throw error;
       setChapterTitle("");
+      setChapterImage(null);
       fetchContent();
       setViewMode('reader');
     } catch (err) {
@@ -59,12 +70,6 @@ export default function App() {
     window.addEventListener('click', unlock);
     return () => window.removeEventListener('click', unlock);
   }, []);
-
-  const handleChapterImageUpload = (e: any) => {
-    if (e.target.files && e.target.files[0]) {
-      setChapterImage(URL.createObjectURL(e.target.files[0]));
-    }
-  };
 
   const addPanels = (e: any) => {
     if (e.target.files) {
@@ -132,11 +137,6 @@ export default function App() {
     }
   };
 
-  const updateVolume = useCallback((triggerId: string, newVolume: number) => {
-    const audio = audioManager.current.get(triggerId);
-    if (audio) audio.volume = newVolume;
-  }, []);
-
   const deleteTrigger = useCallback((panelId: any, triggerId: any) => {
     immediateStop(triggerId);
     setPanels(prev => prev.map(p => p.id === panelId ? { ...p, triggers: p.triggers.filter((t: any) => t.id !== triggerId) } : p));
@@ -188,7 +188,6 @@ export default function App() {
                 const startIndex = allPanels.findIndex(pl => pl.id === t.startPanelId);
                 const endIndex = allPanels.findIndex(pl => pl.id === t.endPanelId);
                 const currentIndex = allPanels.findIndex(pl => pl.id === panel.id);
-
                 if (currentIndex >= startIndex && currentIndex <= endIndex) {
                   playAudio(t);
                 } else {
@@ -199,7 +198,6 @@ export default function App() {
           }
         });
       }, { threshold: 0.1 });
-
       if (panelRef.current) observer.observe(panelRef.current);
       return () => observer.disconnect();
     }, [allPanels, panel.id]);
@@ -231,6 +229,24 @@ export default function App() {
               <Icons.Zap size={20} fill="#3b82f6" /> 
               <span style={{ fontWeight: 900 }}>STUDIO MODE</span>
             </div>
+            
+            <div style={{ marginBottom: '15px' }}>
+              {chapterImage ? (
+                <div style={{ position: 'relative', width: '100%', height: '100px', borderRadius: '8px', overflow: 'hidden', border: '1px solid #333' }}>
+                  <img src={chapterImage} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="thumb" />
+                  <button onClick={() => setChapterImage(null)} style={{ position: 'absolute', top: '5px', right: '5px', background: 'rgba(0,0,0,0.7)', border: 'none', borderRadius: '50%', padding: '5px', cursor: 'pointer' }}>
+                    <Icons.X size={14} color="white" />
+                  </button>
+                </div>
+              ) : (
+                <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '60px', background: '#111', border: '1px dashed #333', borderRadius: '8px', cursor: 'pointer' }}>
+                  <Icons.Image size={20} color="#333" />
+                  <span style={{ fontSize: '10px', color: '#555' }}>Thumbnail</span>
+                  <input type="file" accept="image/*" hidden onChange={handleChapterImageUpload} />
+                </label>
+              )}
+            </div>
+
             <button onClick={() => setViewMode('reader')} style={{ width: '100%', padding: '10px', background: '#111', border: '1px solid #333', color: '#fff', borderRadius: '8px', cursor: 'pointer', marginBottom: '10px' }}>EXIT STUDIO</button>
             <button onClick={handlePublish} disabled={loading} style={{ width: '100%', padding: '10px', background: '#3b82f6', border: 'none', color: '#fff', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
               {loading ? 'PUBLISHING...' : 'PUBLISH CHAPTER'}
@@ -248,18 +264,6 @@ export default function App() {
                   </div>
                </div>
                <input type="file" accept="audio/*" onChange={(e: any) => { if(e.target.files[0]) setEditingTrigger({...editingTrigger, trigger: {...editingTrigger.trigger, audioUrl: URL.createObjectURL(e.target.files[0])}}); }} style={{ width: '100%', marginBottom: '10px', fontSize: '10px' }} />
-               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '11px', marginBottom: '10px' }}>
-                  <div><label>START</label>
-                      <select value={editingTrigger.trigger.startPanelId} onChange={(e) => setEditingTrigger({...editingTrigger, trigger: {...editingTrigger.trigger, startPanelId: e.target.value}})} style={{ width: '100%', background: '#000', color: '#fff', border: '1px solid #222' }}>
-                        {panels.map((p, idx) => <option key={p.id} value={p.id}>Panel {idx + 1}</option>)}
-                      </select>
-                  </div>
-                  <div><label>END</label>
-                      <select value={editingTrigger.trigger.endPanelId} onChange={(e) => setEditingTrigger({...editingTrigger, trigger: {...editingTrigger.trigger, endPanelId: e.target.value}})} style={{ width: '100%', background: '#000', color: '#fff', border: '1px solid #222' }}>
-                        {panels.map((p, idx) => <option key={p.id} value={p.id}>Panel {idx + 1}</option>)}
-                      </select>
-                  </div>
-               </div>
                <button onClick={saveTriggerSettings} style={{ width: '100%', background: '#3b82f6', padding: '8px', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold', marginBottom: '5px' }}>SAVE</button>
                <button onClick={() => deleteTrigger(editingTrigger.panelId, editingTrigger.trigger.id)} style={{ width: '100%', background: '#300', padding: '8px', borderRadius: '4px' }}><Icons.Trash2 size={14} color="#f44" /></button>
             </div>
